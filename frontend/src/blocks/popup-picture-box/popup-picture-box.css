@@ -1,0 +1,26 @@
+.popup-picture-box {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  position: relative;
+  height: calc(100% - 180px);
+  max-width: calc(100% - 80px);
+}
+
+.popup-picture-box__image {
+  max-height: 100%;
+}
+
+.popup-picture-box__caption {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  align-self: flex-start;
+}
+
+@media screen and (max-width: 780px) {
+  .popup-picture-box__button {
+    top: -30px;
+    right: -30px;
+  }
+}

@@ -1,0 +1,26 @@
+.info {
+  color: #000;
+}
+
+.info__body {
+  padding: 60px 36px;
+  text-align: center;
+}
+
+.info__text {
+  margin: 32px 0 0;
+  color: #000;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+@media screen and (max-width: 480px) {
+  .info__body {
+    padding: 50px 18px;
+  }
+  
+  .info__text {
+    font-size: 20px;
+  }
+  
+}

@@ -4,10 +4,10 @@ const crypto = require('crypto');
 
 const User = require('../models/user');
 const errorHandler = require('../errors/errorHandler');
-const { userNotFoundErrorMessage, loginErrorMessage, NOT_FOUND_ERROR_CODE } = require('../utils/constants');
+const { userNotFoundErrorMessage, loginErrorMessage, NOT_FOUND_ERROR_CODE, JWT_SECRET } = require('../utils/constants');
 
 // const JWT_SECRET = crypto.randomBytes(16).toString('hex');
-const JWT_SECRET = '8564161eb2c382fb42868b61e2d82a17';
+// const JWT_SECRET = '8564161eb2c382fb42868b61e2d82a17';
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -18,7 +18,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
-  User.findById(req.params.userId)
+  User.findById(req.user)
     .orFail(() => {
       const error = new Error(userNotFoundErrorMessage);
       error.statusCode = NOT_FOUND_ERROR_CODE;
@@ -50,8 +50,9 @@ module.exports.createUser = (req, res) => {
         email,
         password: hash,
       })
+      .then((user) => res.send(user))
+      .catch((error) => errorHandler(error, res));
     })
-    .then((user) => res.send(user))
     .catch((error) => errorHandler(error, res));
 };
 
@@ -59,7 +60,7 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
-    req.user._id,
+    req.user,
     { name, about },
     { new: true, runValidators: true },
   )
@@ -76,7 +77,7 @@ module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.user._id,
+    req.user,
     { avatar },
     { new: true, runValidators: true },
   )

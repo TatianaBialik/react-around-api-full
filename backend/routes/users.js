@@ -10,7 +10,8 @@ const {
 } = require('../controllers/users');
 
 router.get('/', getUsers);
-router.get('/:userId', getUser);
+// router.get('/:userId', getUser);
+router.get('/me', getUser);
 // router.post('/', celebrate({
 //   body: Joi.object().keys({
 //     email: Joi.string().required().email(),

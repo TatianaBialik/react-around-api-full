@@ -45,32 +45,38 @@ function App() {
   /* Logged in state */
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const [token, setToken] = useState(localStorage.getItem('jwt'));
+
   /* useHistory */
   const history = useHistory();
 
   /* Get initial page information: user info and cards gallery */
   useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
+    if (token) {
+      Promise.all([api.getUserInfo(), api.getInitialCards()])
       .then(([userInfo, cards]) => {
         setCurrentUser(userInfo);
         setCards(cards);
       })
       .catch(err => console.log(err));
-  }, []);
+    }
+  }, [token]);
 
   /* Checking user token stored in local storage when the resourse is loaded */
   useEffect(() => {
-    const token = localStorage.getItem('jwt');
+    // setToken(localStorage.getItem('jwt'));
+    // const token = localStorage.getItem('jwt');
     if (token) {
       auth
         .checkToken(token)
         .then((res) => {
-          if (res.data) {
-            setEmail(res.data.email);
+          if (res) {
+            setEmail(res.email);
             setIsLoggedIn(true);
             history.push('/');
           } else {
             localStorage.removeItem('jwt');
+            // setToken('');
           }
         })
         .catch((err) => console.log(err));
@@ -79,7 +85,7 @@ function App() {
 
   /* Cards' buttons handlers: like and delete card */
   function handleCardLike(card) {
-    const isLiked = card.likes.some(user => user._id === currentUser._id);
+    const isLiked = card.likes.some(user => user === currentUser._id);
     api
       .changeLikeCardStatus(card._id, isLiked)
       .then(newCard => {
@@ -127,7 +133,7 @@ function App() {
     auth
       .register(email, password)
       .then((res) => {
-        if (res.data._id) {
+        if (res._id) {
           setInfoToolTipStatus('success');
           history.push('/signin');
         } else {
@@ -143,11 +149,12 @@ function App() {
   function handleLogin({ email, password }) {
     auth
       .login(email, password)
-      .then(({ token }) => {
-        if (token) {
+      .then((res) => {
+        if (res.token) {
           setIsLoggedIn(true);
           setEmail(email);
-          localStorage.setItem('jwt', token);
+          localStorage.setItem('jwt', res.token);
+          setToken(res.token);
           history.push('/');
         } else {
           setInfoToolTipStatus('error');
@@ -165,6 +172,8 @@ function App() {
     setIsLoggedIn(false);
     setEmail('');
     localStorage.removeItem('jwt');
+    setToken('');
+    console.log(token)
     history.push('/signin');
   };
 

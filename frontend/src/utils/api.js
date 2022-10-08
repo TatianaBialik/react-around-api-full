@@ -22,7 +22,7 @@ class Api {
     return this._request('/cards', {});
   };
 
-  addCard({name,link}) {
+  addCard({name, link}) {
     return this._request('/cards', {
       method: 'POST',
       body: JSON.stringify({
@@ -34,10 +34,10 @@ class Api {
 
   changeLikeCardStatus(id, isLiked) {
     return (isLiked) ? 
-      this._request('/cards/likes/' + id, {
+      this._request(`/cards/${id}/likes`, {
           method: 'DELETE',
         }) :
-      this._request('/cards/likes/' + id, {
+      this._request(`/cards/${id}/likes`, {
           method: 'PUT',
         });
   };
@@ -57,7 +57,7 @@ class Api {
     });
   };
 
-  editProfileInfo({name,about}) {
+  editProfileInfo({name, about}) {
     return this._request('/users/me', {
       method: 'PATCH',
       body: JSON.stringify({
@@ -69,9 +69,9 @@ class Api {
 };
 
 const api = new Api({
-  baseUrl: 'https://around.nomoreparties.co/v1/cohort-3-en',
+  baseUrl: 'http://localhost:3001',
   headers: {
-    authorization: 'c0d07090-8c80-49c2-aa7a-cd5677a34984',
+    authorization: `Bearer ${localStorage.getItem('jwt')}`,
     'Content-Type': 'application/json'
   }
 });

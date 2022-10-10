@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { loginErrorMessage, INVALID_LOGIN_ERROR_CODE } = require('../utils/constants');
 const bcrypt = require('bcryptjs');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -52,17 +53,13 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if(!user) {
-        const error = new Error(loginErrorMessage);
-        error.statusCode = INVALID_LOGIN_ERROR_CODE;
-        return Promise.reject(error);
+        return Promise.reject(new UnauthorizedError(loginErrorMessage));
       };
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if(!matched) {
-            const error = new Error(loginErrorMessage);
-            error.statusCode = INVALID_LOGIN_ERROR_CODE;
-            return Promise.reject(error);
+            return Promise.reject(new UnauthorizedError(loginErrorMessage));
           };
 
           return user;

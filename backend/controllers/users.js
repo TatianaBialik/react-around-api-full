@@ -3,36 +3,32 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 const User = require('../models/user');
-const errorHandler = require('../errors/errorHandler');
-const { userNotFoundErrorMessage, loginErrorMessage, NOT_FOUND_ERROR_CODE, JWT_SECRET } = require('../utils/constants');
+const NotFoundError = require('../errors/NotFoundError');
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequestError');
+const { userNotFoundErrorMessage, JWT_SECRET } = require('../utils/constants');
 
 // const JWT_SECRET = crypto.randomBytes(16).toString('hex');
 // const JWT_SECRET = '8564161eb2c382fb42868b61e2d82a17';
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((error) => {
-      errorHandler(error, res);
-    });
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.user)
     .orFail(() => {
-      const error = new Error(userNotFoundErrorMessage);
-      error.statusCode = NOT_FOUND_ERROR_CODE;
-      throw error;
+      throw new NotFoundError(userNotFoundErrorMessage);
     })
     .then((user) => {
       res.send(user);
     })
-    .catch((error) => {
-      errorHandler(error, res);
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -41,22 +37,36 @@ module.exports.createUser = (req, res) => {
     password,
   } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => {
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      })
-      .then((user) => res.send(user))
-      .catch((error) => errorHandler(error, res));
-    })
-    .catch((error) => errorHandler(error, res));
+  User.findOne({ email })
+    .then((user) => {
+      if(user) {
+        throw new ConflictError('User with such email already exists');
+      };
+
+      return bcrypt.hash(password, 10)
+        .then((hash) => {
+          User.create({
+            name,
+            about,
+            avatar,
+            email,
+            password: hash,
+          })
+          .then((user) => res.send(user))
+          .catch((err) => {
+            if(err.name === 'ValidationError') {
+              next(new BadRequestError(err.message));
+            };
+
+            next(err);
+          });
+        })
+        .catch(next);
+        })
+    .catch(next);
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -65,15 +75,13 @@ module.exports.updateUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail(() => {
-      const error = new Error(userNotFoundErrorMessage);
-      error.statusCode = NOT_FOUND_ERROR_CODE;
-      throw error;
+      throw new NotFoundError(userNotFoundErrorMessage);
     })
     .then((user) => res.send(user))
-    .catch((error) => errorHandler(error, res));
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -82,15 +90,13 @@ module.exports.updateAvatar = (req, res) => {
     { new: true, runValidators: true },
   )
     .orFail(() => {
-      const error = new Error(userNotFoundErrorMessage);
-      error.statusCode = NOT_FOUND_ERROR_CODE;
-      throw error;
+      throw new NotFoundError(userNotFoundErrorMessage);
     })
     .then((user) => res.send(user))
-    .catch((error) => errorHandler(error, res));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -102,5 +108,5 @@ module.exports.login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((error) => errorHandler(error, res));
+    .catch(next);
 };

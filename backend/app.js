@@ -9,6 +9,7 @@ const router = require('./routes/index');
 const { dbserver } = require('./utils/constants');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -34,8 +35,6 @@ app.use('/', router);
 
 //Errors handling: validation errors from celebrate, common errors
 app.use(errors());
-// app.use((err, req, res, next) => {
-
-// });
+app.use(errorHandler);
 
 app.listen(PORT);

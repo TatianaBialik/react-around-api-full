@@ -53,7 +53,7 @@ function App() {
   /* Get initial page information: user info and cards gallery */
   useEffect(() => {
     if (token) {
-      Promise.all([api.getUserInfo(), api.getInitialCards()])
+      Promise.all([api.getUserInfo(token), api.getInitialCards(token)])
       .then(([userInfo, cards]) => {
         setCurrentUser(userInfo);
         setCards(cards);
@@ -64,8 +64,6 @@ function App() {
 
   /* Checking user token stored in local storage when the resourse is loaded */
   useEffect(() => {
-    // setToken(localStorage.getItem('jwt'));
-    // const token = localStorage.getItem('jwt');
     if (token) {
       auth
         .checkToken(token)
@@ -87,7 +85,7 @@ function App() {
   function handleCardLike(card) {
     const isLiked = card.likes.some(user => user === currentUser._id);
     api
-      .changeLikeCardStatus(card._id, isLiked)
+      .changeLikeCardStatus(card._id, isLiked, token)
       .then(newCard => {
         setCards(state =>
           state.map(currentCard =>
@@ -105,7 +103,7 @@ function App() {
   const handleDeleteCardSubmission = () => {
     setIsSaving(true);
     api
-      .deleteCard(selectedCard._id)
+      .deleteCard(selectedCard._id, token)
       .then(() => {
         setCards(state =>
           state.filter(currentCard =>
@@ -119,7 +117,7 @@ function App() {
   const handleAddPlaceSubmit = ({ name, link }) => {
     setIsSaving(true);
     api
-      .addCard({ name, link })
+      .addCard({ name, link }, token)
       .then(newCard => {
         setCards([newCard, ...cards]);
         closeAllPopups();
@@ -173,7 +171,6 @@ function App() {
     setEmail('');
     localStorage.removeItem('jwt');
     setToken('');
-    console.log(token)
     history.push('/signin');
   };
 
@@ -209,7 +206,7 @@ function App() {
   const handleUpdateUser = ({ name, about }) => {
     setIsSaving(true);
     api
-      .editProfileInfo({ name, about })
+      .editProfileInfo({ name, about }, token)
       .then(newUser => {
         setCurrentUser(newUser);
         closeAllPopups();
@@ -221,7 +218,7 @@ function App() {
   const handleUpdateAvatar = (({ avatar }) => {
     setIsSaving(true);
     api
-      .editProfilePhoto(avatar)
+      .editProfilePhoto(avatar, token)
       .then(newUser => {
         setCurrentUser(newUser);
         closeAllPopups();

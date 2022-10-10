@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const limiter = require('./utils/rateLimiter');
 const { errors } = require('celebrate');
-const cors = require('cors');
+var cors = require('cors');
 
 const router = require('./routes/index');
 const { dbserver } = require('./utils/constants');
@@ -22,6 +22,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(limiter);
 app.use(cors());
+app.options('*', cors());
 
 // app.post('/signin', validateAuthentication, login);
 // app.post('/signup', validateAuthentication, createUser);

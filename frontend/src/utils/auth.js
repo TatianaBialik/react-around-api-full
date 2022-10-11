@@ -1,4 +1,4 @@
-import BASE_URL from './constants';
+import { BASE_URL } from './constants';
 
 function checkResponse(res) {
   return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);

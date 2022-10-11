@@ -1,4 +1,4 @@
-import BASE_URL from './constants';
+import { BASE_URL } from './constants';
 class Api {
   constructor(options) {
     this._baseUrl = options.baseUrl;

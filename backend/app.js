@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const { errors } = require('celebrate');
 const cors = require('cors');
 const limiter = require('./utils/rateLimiter');
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 
 const router = require('./routes/index');
 const { dbserver } = require('./utils/constants');

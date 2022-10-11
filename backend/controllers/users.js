@@ -1,15 +1,13 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const ConflictError = require('../errors/ConflictError');
 const BadRequestError = require('../errors/BadRequestError');
-const { userNotFoundErrorMessage, JWT_SECRET } = require('../utils/constants');
+const { userNotFoundErrorMessage } = require('../utils/constants');
 
-// const JWT_SECRET = crypto.randomBytes(16).toString('hex');
-// const JWT_SECRET = '8564161eb2c382fb42868b61e2d82a17';
+const { NODE_ENV = 'development', JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -39,9 +37,9 @@ module.exports.createUser = (req, res, next) => {
 
   User.findOne({ email })
     .then((user) => {
-      if(user) {
+      if (user) {
         throw new ConflictError('User with such email already exists');
-      };
+      }
 
       return bcrypt.hash(password, 10)
         .then((hash) => {
@@ -52,17 +50,17 @@ module.exports.createUser = (req, res, next) => {
             email,
             password: hash,
           })
-          .then((user) => res.send(user))
-          .catch((err) => {
-            if(err.name === 'ValidationError') {
-              next(new BadRequestError(err.message));
-            };
+            .then((newUser) => res.send(newUser))
+            .catch((err) => {
+              if (err.name === 'ValidationError') {
+                next(new BadRequestError(err.message));
+              }
 
-            next(err);
-          });
+              next(err);
+            });
         })
         .catch(next);
-        })
+    })
     .catch(next);
 };
 
@@ -103,7 +101,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        JWT_SECRET,
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
       res.send({ token });

@@ -11,5 +11,4 @@ module.exports = {
   notFoundErrorMessage,
   userNotFoundErrorMessage,
   loginErrorMessage,
-  JWT_SECRET,
 };

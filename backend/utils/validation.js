@@ -1,11 +1,11 @@
 const validator = require('validator');
-const { errors, Joi, celebrate } = require('celebrate');
+const { Joi, celebrate } = require('celebrate');
 const { ObjectId } = require('mongoose').Types;
 
 const validateURL = (value, helpers) => {
   if (validator.isURL(value)) {
     return value;
-  };
+  }
 
   return helpers.error('string.uri');
 };
@@ -13,10 +13,10 @@ const validateURL = (value, helpers) => {
 const validateObjectId = (value, helpers) => {
   if (ObjectId.isValid(value)) {
     return value;
-  };
+  }
 
   return helpers.message('Object ID is invalid');
-}
+};
 
 const validateAuthentication = celebrate({
   body: Joi.object().keys({
@@ -24,19 +24,6 @@ const validateAuthentication = celebrate({
     password: Joi.string().required().min(8),
   }),
 });
-
-// const validateUser = celebrate({
-//   body: Joi.object().keys({
-//     name: Joi.string().min(2).max(30),
-//     about: Joi.string().min(2).max(30),
-//     avatar: Joi.string().custom(validateURL),
-//     email: Joi.string().required().email(),
-//     password: Joi.string().required().min(8),
-//   }),
-//   headers: Joi.object().keys({
-//     authorization: Joi.string().token().required(),
-//   }),
-// });
 
 const validateUserProfile = celebrate({
   body: Joi.object().keys({

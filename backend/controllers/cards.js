@@ -14,9 +14,9 @@ module.exports.createCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user })
     .then((card) => res.send(card))
     .catch((err) => {
-      if(err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError(err.message));
-      };
+      }
 
       next(err);
     });
@@ -28,13 +28,13 @@ module.exports.deleteCard = (req, res, next) => {
       throw new NotFoundError('Card not found');
     })
     .then((card) => {
-      if (card.owner != req.user) {
+      if (card.owner.toString() !== req.user) {
         throw new ForbiddenError('You dont have rights to delete this card');
       } else {
         Card.findByIdAndRemove(req.params.cardId)
-          .then((card) => res.send(card))
+          .then((item) => res.send(item))
           .catch(next);
-        }
+      }
     })
     .catch(next);
 };

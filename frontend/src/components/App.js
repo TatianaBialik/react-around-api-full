@@ -74,7 +74,6 @@ function App() {
             history.push('/');
           } else {
             localStorage.removeItem('jwt');
-            // setToken('');
           }
         })
         .catch((err) => console.log(err));

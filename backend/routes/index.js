@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const cardsRouter = require('./cards');
 const usersRouter = require('./users');
-const { NOT_FOUND_ERROR_CODE, notFoundErrorMessage } = require('../utils/constants');
+const NotFoundError = require('../errors/NotFoundError');
+const { notFoundErrorMessage } = require('../utils/constants');
 const { login, createUser } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 const { validateAuthentication } = require('../utils/validation');
@@ -13,8 +14,8 @@ router.use(auth);
 
 router.use('/cards', cardsRouter);
 router.use('/users', usersRouter);
-router.use('/*', (req, res) => {
-  res.status(NOT_FOUND_ERROR_CODE).send({ message: notFoundErrorMessage });
+router.use('/*', (req, res, next) => {
+  next(new NotFoundError(notFoundErrorMessage));
 });
 
 module.exports = router;
